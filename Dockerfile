@@ -30,4 +30,4 @@ RUN pip install --requirement requirements.txt
 COPY hello.py ./
 
 # Set the default command for the image
-CMD python ${WORKDIR}/hello.py
+CMD python /app/hello.py
