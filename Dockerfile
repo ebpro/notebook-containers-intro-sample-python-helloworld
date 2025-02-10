@@ -16,7 +16,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE
 ENV NAME="John Doe"
 
 # Creates and moves to a directory
-WORKDIR ${WORKDIR}
+WORKDIR /app
 
 # Copy the requirements them in the new image.
 # Done before the copy of the src to limit cache invalidations
