@@ -29,5 +29,5 @@ RUN pip install --requirement requirements.txt
 # Copy the sources
 COPY hello.py ./
 
-# Set the default command for the image
-CMD ["python", "/app/hello.py"]
+# Set the entrypoint for the image (keeps command arguments overrideable)
+ENTRYPOINT ["python", "/app/hello.py"]
