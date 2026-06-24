@@ -1,33 +1,50 @@
-# syntax=docker/dockerfile:1
+# --------------------------------------------------------------------
+# Base image
+# --------------------------------------------------------------------
+FROM python:3.13-slim
 
-# Choose the parent image
-FROM python:3.12-slim
+# --------------------------------------------------------------------
+# Build arguments (available only during image build)
+# --------------------------------------------------------------------
+ARG BUILD_DATE="1970-01-01T00:00:00Z"
 
-# An argument sets at build command with --build-arg
-# It as a default value
-ARG BUILD_DATE=1970-01-01T00:00:00Z
+# --------------------------------------------------------------------
+# OCI image metadata
+# https://github.com/opencontainers/image-spec/blob/main/annotations.md
+# --------------------------------------------------------------------
+LABEL org.opencontainers.image.authors="emmanuel.bruno@univ-tln.fr" \
+      org.opencontainers.image.created="${BUILD_DATE}"
 
-# key-value pair as image metadata
-LABEL maintainer="emmanuel.bruno@univ-tln.fr"
-# See http://label-schema.org/rc1/ for a list of usefull labels
-LABEL org.label-schema.build-date=$BUILD_DATE
-
-# An environment variable
+# --------------------------------------------------------------------
+# Environment variables
+# --------------------------------------------------------------------
 ENV NAME="John Doe"
 
-# Creates and moves to a directory
+# --------------------------------------------------------------------
+# Application directory
+# --------------------------------------------------------------------
 WORKDIR /app
 
-# Copy the requirements them in the new image.
-# Done before the copy of the src to limit cache invalidations
-# when only source code changes.
-COPY requirements.txt ./
+# --------------------------------------------------------------------
+# Install Python dependencies
+# Copy requirements first to maximize Docker cache reuse.
+# --------------------------------------------------------------------
+COPY requirements.txt .
 
-# Installation of the dependencies
-RUN pip install --requirement requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the sources
-COPY hello.py ./
+# --------------------------------------------------------------------
+# Copy application source
+# --------------------------------------------------------------------
+COPY hello.py .
 
-# Set the entrypoint for the image (keeps command arguments overrideable)
-ENTRYPOINT ["python", "/app/hello.py"]
+# --------------------------------------------------------------------
+# Run as a non-root user (container security best practice)
+# --------------------------------------------------------------------
+RUN useradd --create-home appuser
+USER appuser
+
+# --------------------------------------------------------------------
+# Default command
+# --------------------------------------------------------------------
+ENTRYPOINT ["python", "hello.py"]
